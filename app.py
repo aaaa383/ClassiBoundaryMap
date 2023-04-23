@@ -144,10 +144,8 @@ elif model_name == "勾配ブースティング決定木(XGboost)":
     model = choose_model(
         model_name, n_estimators=n_estimators, max_depth=max_depth)
 
-
 # モデルの学習
 model.fit(X_train, y_train)
-
 
 # 学習データ
 pred_train = model.predict(X_train)
