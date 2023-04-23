@@ -94,7 +94,7 @@ def plot_confusion_matrix(model, X, y):
 # Streamlitアプリ
 st.title("機械学習の分類境界を表示するアプリ")
 n_samples = st.sidebar.slider("データ数", 100, 1000, 300)
-centers = st.sidebar.slider("クラスター数", 2, 5, 3)
+centers = st.sidebar.slider("クラスター数", 2, 4, 3)
 cluster_std = st.sidebar.slider("クラスターの標準偏差", 0, 10, 1)
 random_state = st.sidebar.slider("乱数のシード値", 0, 100, 42)
 
