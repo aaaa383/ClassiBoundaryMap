@@ -1,6 +1,7 @@
 import streamlit as st
 import numpy as np
 from sklearn.datasets import make_blobs
+from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from sklearn.linear_model import LogisticRegression
 from sklearn.neighbors import KNeighborsClassifier
@@ -92,15 +93,19 @@ def plot_confusion_matrix(model, X, y):
 
 
 # Streamlitアプリ
-st.title("機械学習の分類境界を表示するアプリ")
+st.title("機械学習の分類境界を表示")
 n_samples = st.sidebar.slider("データ数", 100, 1000, 300)
-centers = st.sidebar.slider("クラスター数", 2, 5, 3)
+centers = st.sidebar.slider("クラスター数", 2, 4, 3)
 cluster_std = st.sidebar.slider("クラスターの標準偏差", 0, 10, 1)
 random_state = st.sidebar.slider("乱数のシード値", 0, 100, 42)
 
 data = generate_data(n_samples, 2, centers, cluster_std, random_state)
 X, y = data
 X = StandardScaler().fit_transform(X)
+
+# データの分割
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.3, random_state=random_state)
 
 model_name = st.sidebar.selectbox("機械学習モデルを選択", [
                                   "ロジスティック回帰", "k近傍法", "SVM", "決定木", "ランダムフォレスト", "ニューラルネットワーク", "勾配ブースティング決定木(XGboost)"])
@@ -141,22 +146,34 @@ elif model_name == "勾配ブースティング決定木(XGboost)":
 
 
 # モデルの学習
-model.fit(X, y)
-pred_train = model.predict(X)
+model.fit(X_train, y_train)
 
-# 決定境界を描画
-st.subheader(f"{model_name}の分類境界")
+
+# 学習データ
+pred_train = model.predict(X_train)
+st.subheader(f"学習データ: {model_name}の分類境界")
 fig, ax = plt.subplots()
-plot_decision_boundary(model, X, y)
+plot_decision_boundary(model, X_train, y_train)
 st.pyplot(fig)
-
-# 混合行列をプロット
-st.subheader("混合行列")
-fig = plot_confusion_matrix(model, X, y)
+st.subheader("学習データ: 混合行列")
+fig = plot_confusion_matrix(model, X_train, y_train)
 st.pyplot(fig)
-
-
-# 結果の表示
-st.subheader("モデルの評価")
+st.subheader("学習データ: モデルの評価")
 st.write(f"##### モデル: {model_name}")
-st.write(f"##### 学習データの正解率(accuracy): {accuracy_score(y, pred_train):.2f}")
+st.write(
+    f"##### 学習データの正解率(accuracy): {accuracy_score(y_train, pred_train):.2f}")
+
+st.write("----------------------------------------------------------------------------------")
+
+# 検証データ
+pred_test = model.predict(X_test)
+st.subheader(f"検証データ: {model_name}の分類境界")
+fig, ax = plt.subplots()
+plot_decision_boundary(model, X_test, y_test)
+st.pyplot(fig)
+st.subheader("検証データ: 混合行列")
+fig = plot_confusion_matrix(model, X_test, y_test)
+st.pyplot(fig)
+st.subheader("検証データ: モデルの評価")
+st.write(f"##### モデル: {model_name}")
+st.write(f"##### 検証データの正解率(accuracy): {accuracy_score(y_test, pred_test):.2f}")
